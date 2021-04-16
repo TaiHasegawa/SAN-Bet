@@ -11,11 +11,11 @@ Experiments were conducted with packages below:
 * NetworKit 7.1
 
 ### Ranking approximation
-For ranking approximation on scale-free graph, run the code as:
-`python run_Ranking.py --g SF`
+For ranking approximation on scale-free graph, run the code as:  
+`python run_Ranking.py --g SF`  
 "SF" can be replaced by "ER" or "GRP".
 
 ### Top-K% Identification
-For Top-1% Identification on scale-free graph, run the code as:
-`python run_TopK.py --g SF --k 0.01`
+For Top-1% Identification on scale-free graph, run the code as:  
+`python run_TopK.py --g SF --k 0.01`  
 "SF" can be replaced by "ER" or "GRP", and 0 < k < 1.
