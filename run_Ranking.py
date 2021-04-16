@@ -10,8 +10,6 @@ from model import SANBet
 torch.manual_seed(20)
 import argparse
 
-gtypes = ["ER", "SF", "GRP"]
-hidden = 10
 
 def train(list_adj_train,list_adj_t_train,list_num_node_train,bc_mat_train):
     model.train()
@@ -57,51 +55,55 @@ def test(list_adj_test,list_adj_t_test,list_num_node_test,bc_mat_test):
     print(f"   Average KT score on test graphs is: {np.mean(np.array(list_kt))} and std: {np.std(np.array(list_kt))}")
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--g",default="SF")
+args = parser.parse_args()
+gtype = args.g
 
-for gtype in gtypes:
-    num_epoch =  10
-    model_size = 10000
+# parameters
+hidden = 10
+num_epoch =  10
+model_size = 10000
 
-    #Loading graph data
-    print(gtype)
-    if gtype == "SF":
-        data_path = "./datasets/data_splits/SF-"
-        print("Scale-free graphs selected.")
-    elif gtype == "ER":
-        data_path = "./datasets/data_splits/ER-"
-        print("Erdos-Renyi random graphs selected.")
-    elif gtype == "GRP":
-        data_path = "./datasets/data_splits/GRP-"
-        print("Gaussian Random Partition graphs selected.")
-    
-    #Load training data
-    print(f"Loading data...")
-    with open(data_path+"training.pickle","rb") as fopen:
-        list_graph_train,list_n_seq_train,list_num_node_train,bc_mat_train = pickle.load(fopen)
+#Loading graph data
+if gtype == "SF":
+    data_path = "./datasets/data_splits/SF-"
+    print("Scale-free graphs selected.")
+elif gtype == "ER":
+    data_path = "./datasets/data_splits/ER-"
+    print("Erdos-Renyi random graphs selected.")
+elif gtype == "GRP":
+    data_path = "./datasets/data_splits/GRP-"
+    print("Gaussian Random Partition graphs selected.")
 
-    #Load test data
-    with open(data_path+"test.pickle","rb") as fopen:
-        list_graph_test,list_n_seq_test,list_num_node_test,bc_mat_test = pickle.load(fopen)
+#Load training data
+print(f"Loading data...")
+with open(data_path+"training.pickle","rb") as fopen:
+    list_graph_train,list_n_seq_train,list_num_node_train,bc_mat_train = pickle.load(fopen)
 
-    #Get adjacency matrices from graphs
-    print(f"Graphs to adjacency conversion.")
-    list_adj_train,list_adj_t_train = graph_to_adj_bet(list_graph_train,list_n_seq_train,list_num_node_train,model_size)
-    list_adj_test,list_adj_t_test = graph_to_adj_bet(list_graph_test,list_n_seq_test,list_num_node_test,model_size)
+#Load test data
+with open(data_path+"test.pickle","rb") as fopen:
+    list_graph_test,list_n_seq_test,list_num_node_test,bc_mat_test = pickle.load(fopen)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = SANBet(input_features=model_size, hidden_features=hidden, dropout=0.6)
+#Get adjacency matrices from graphs
+print(f"Graphs to adjacency conversion.")
+list_adj_train,list_adj_t_train = graph_to_adj_bet(list_graph_train,list_n_seq_train,list_num_node_train,model_size)
+list_adj_test,list_adj_t_test = graph_to_adj_bet(list_graph_test,list_n_seq_test,list_num_node_test,model_size)
 
-    model.to(device)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = SANBet(input_features=model_size, hidden_features=hidden, dropout=0.6)
 
-    optimizer = torch.optim.Adam(model.parameters(),lr=0.0005)
+model.to(device)
 
-    print("Training")
-    print(f"Total Number of epoches: {num_epoch}")
+optimizer = torch.optim.Adam(model.parameters(),lr=0.0005)
 
-    for e in range(num_epoch):
-        print(f"Epoch number: {e+1}/{num_epoch}")
-        train(list_adj_train,list_adj_t_train,list_num_node_train,bc_mat_train)
+print("Training")
+print(f"Total Number of epoches: {num_epoch}")
 
-        # check test loss while training
-        with torch.no_grad():
-            test(list_adj_test,list_adj_t_test,list_num_node_test,bc_mat_test)
+for e in range(num_epoch):
+    print(f"Epoch number: {e+1}/{num_epoch}")
+    train(list_adj_train,list_adj_t_train,list_num_node_train,bc_mat_train)
+
+    # check test loss while training
+    with torch.no_grad():
+        test(list_adj_test,list_adj_t_test,list_num_node_test,bc_mat_test)
