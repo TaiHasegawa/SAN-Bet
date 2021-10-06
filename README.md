@@ -1,5 +1,5 @@
 # SAN-Bet
-This repository provides a PyTorch implementation of SAN-Bet.
+This repository provides a PyTorch implementation of SAN-Bet　which is a fast GNN-based model to approximate betweenness centrality of node.
 
 ### Package Requirements
 Experiments were conducted with packages below:
